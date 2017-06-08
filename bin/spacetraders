@@ -1,0 +1,16 @@
+#!/usr/bin/env node
+'use strict'
+
+const pkg = require('../package.json')
+// const updateNotifier = require('update-notifier')
+const args = process.argv.slice(2)
+
+// updateNotifier({pkg}).notify({defer: true})
+
+require('exit-code')
+
+process.on('uncaughtException', function(err) {
+  console.log(err)
+})
+
+require('../')
