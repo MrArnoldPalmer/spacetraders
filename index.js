@@ -12,12 +12,15 @@ const Spinner = CLI.Spinner
 clear()
 console.log(
   chalk.yellow(figlet.textSync('SpaceTraders', {
-    horizontalLayout: 'universal smushing',
+    horizontalLayout: 'right smushing',
     font: 'Small Slant'
   }))
 )
 console.log(chalk.bold.green('\n  Online Space Trading MMORPG'))
 console.log(chalk.cyan(`  Version ${pkg.version}\n`))
+console.log(chalk.white('  Type `help` see available commands. \n'))
+
+let persists = false
 
 vorpal
   .command('login')
@@ -26,8 +29,24 @@ vorpal
   .option('-v', '--resend-verification', 'resends verification email')
   .action(function(args, cb) {
     clear()
-    this.log('logging in...');
-    cb();
+    let status = new Spinner('Authenticating you, please wait...');
+    return this.prompt({
+      type: 'confirm',
+      name: 'continue',
+      default: true,
+      message: 'Testing Async. Continue?',
+    }).then(answer => {
+      status.start();
+      return this.prompt({
+        type: 'confirm',
+        name: 'continue',
+        default: true,
+        message: 'Testing Async Again. Continue?',
+      })
+    }).then(answer => {
+      status.stop()
+      cb()
+    })
   });
 
   vorpal
