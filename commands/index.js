@@ -1,8 +1,8 @@
 const utils = require('../lib/utils')
 
-module.exports = (vorpal) => {
+module.exports = (client) => {
   utils.getCommands().forEach(command => {
     if (command === 'index') { return }
-    require(`./${command}`)(vorpal)
+    require(`./${command}`)(client)
   })
 }

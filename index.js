@@ -1,10 +1,19 @@
 'use strict'
 
 const vorpal = require('vorpal')()
-const pkg = require('./package.json')
-const chalk = vorpal.chalk
 const clear = require('clear')
 const figlet = require('figlet')
+const Auth = require('./lib/auth')
+const Preferences = require('preferences')
+const pkg = require('./package.json')
+const config = require('./lib/config')
+const chalk = vorpal.chalk
+
+const client = {
+  vorpal,
+  config: new Preferences(pkg.name),
+  auth: new Auth(vorpal, config)
+}
 
 // Show banner
 clear()
@@ -19,7 +28,7 @@ console.log(chalk.cyan(`  Version ${pkg.version}\n`))
 console.log(chalk.white('  Type `help` see available commands. \n'))
 
 // fetch and instantiate all commands
-require('./commands')(vorpal)
+require('./commands')(client)
 
 // initiate REPL
 vorpal

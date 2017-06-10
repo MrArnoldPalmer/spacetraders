@@ -46,6 +46,7 @@
     "clui": "^0.3.1",
     "exit-code": "^1.0.2",
     "figlet": "^1.2.0",
+    "firebase": "^4.1.2",
     "preferences": "^0.2.1",
     "update-notifier": "^2.2.0",
     "vorpal": "^1.12.0"
