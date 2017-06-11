@@ -8,11 +8,12 @@ const Preferences = require('preferences')
 const pkg = require('./package.json')
 const config = require('./lib/config')
 const chalk = vorpal.chalk
+const prefs = new Preferences(pkg.name)
 
 const client = {
   vorpal,
-  config: new Preferences(pkg.name),
-  auth: new Auth(vorpal, config)
+  config: prefs,
+  auth: new Auth(config, prefs)
 }
 
 // Show banner
@@ -34,3 +35,11 @@ require('./commands')(client)
 vorpal
   .delimiter('spacetraders$')
   .show();
+
+// catch any unknown commands
+vorpal
+  .catch('[words...]', 'Catches incorrect commands')
+  .action(function (args, cb) {
+    this.log(args.words.join(' ') + ' is not a valid SpaceTraders command.\n');
+    cb();
+  });
