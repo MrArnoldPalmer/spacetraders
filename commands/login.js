@@ -11,6 +11,13 @@ module.exports = function(client) {
     .option('-u, --update-usage-collection', 'changes usage collection preferences')
     .action(function(args, cb) {
       clear()
+      if (auth.user) {
+        if (!auth.user.emailVerified) {
+          cb(vorpal.chalk.green('Please verify your email by clicking the verification link sent to: ') + vorpal.chalk.bold(auth.user.email) + '\n')
+        }
+        cb(vorpal.chalk.green('Currently logged in as: ') + vorpal.chalk.bold(auth.user.email) + '\n')
+        return
+      }
       return this.prompt([
         {
           type: 'confirm',
@@ -24,7 +31,9 @@ module.exports = function(client) {
           type: 'list',
           name: 'provider',
           message: 'Choose authentication method',
-          when() { return !args.options['update-usage-collection'] },
+          when() {
+            return !args.options['update-usage-collection']
+          },
           choices: [
             { value: 'email', name: 'Email and Password' },
             { value: 'google', name: 'Google (disabled)', disabled: true},
@@ -39,9 +48,16 @@ module.exports = function(client) {
           this.log(vorpal.chalk.green('CLI usage preference saved.\n'))
           if (args.options['update-usage-collection']) return
         }
+        this.log(vorpal.chalk.yellow('Authenticating with email and password...\n'))
         return auth.login(provider)
       }).then(user => {
-        this.log({user})
+        if (user) {
+          this.log(vorpal.chalk.green('Successfully logged in as: ') + vorpal.chalk.bold(user.email) + '\n');
+          cb()
+          return
+        }
+        cb()
+        return
       }).catch(error => {
         switch (error.code) {
           case 'auth/user-not-found':
@@ -49,7 +65,9 @@ module.exports = function(client) {
             break;
           case 'auth/wrong-password':
             this.log(vorpal.chalk.bold('Invalid Password') + ' please try again.\n');
-            return auth.emailProvider({passwordOnly: true})
+            return auth.emailProvider({passwordOnly: true}).then(user => {
+              this.log(vorpal.chalk.green('Successfully logged in as: ') + vorpal.chalk.bold(user.email) + '\n');
+            })
             break;
           default:
             this.log('Sign In Error: ', error.code)
