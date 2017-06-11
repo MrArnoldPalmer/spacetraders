@@ -11,42 +11,58 @@ module.exports = function(client) {
     .option('-u, --update-usage-collection', 'changes usage collection preferences')
     .action(function(args, cb) {
       clear()
-      if (auth.user) {
-        if (!auth.user.emailVerified) {
-          cb(vorpal.chalk.green('Please verify your email by clicking the verification link sent to: ') + vorpal.chalk.bold(auth.user.email) + '\n')
-        }
-        cb(vorpal.chalk.green('Currently logged in as: ') + vorpal.chalk.bold(auth.user.email) + '\n')
-        return
-      }
-      return this.prompt([
-        {
-          type: 'confirm',
-          name: 'collectUsage',
-          message: 'Allow SpaceTraders to collect anonymous CLI usage information?',
-          when() {
-            return typeof config.usage === 'undefined' || args.options['update-usage-collection']
+      return new Promise((resolve, reject) => {
+        if (auth.user) {
+          if (!auth.user.emailVerified) {
+            cb(vorpal.chalk.yellow('Please verify your email by clicking the\nverification link sent to: ') + vorpal.chalk.bold(auth.user.email) + '\n')
           }
-        },
-        {
-          type: 'list',
-          name: 'provider',
-          message: 'Choose authentication method',
-          when() {
-            return !args.options['update-usage-collection']
-          },
-          choices: [
-            { value: 'email', name: 'Email and Password' },
-            { value: 'google', name: 'Google (disabled)', disabled: true},
-            { value: 'facebook', name: 'Facebook (disabled)', disabled: true },
-            { value: 'phone', name: 'Phone Number (disabled)', disabled: true }
-          ]
+          cb(vorpal.chalk.green('Currently logged in as: ') + vorpal.chalk.bold(auth.user.email) + '\n')
+          return
         }
-      ]).then(({collectUsage, provider}) => {
+        resolve()
+      }).then(() => {
+        return this.prompt([
+          {
+            type: 'confirm',
+            name: 'collectUsage',
+            message: 'Allow SpaceTraders to collect anonymous CLI usage information?',
+            when() {
+              return typeof config.usage === 'undefined' || args.options['update-usage-collection']
+            }
+          },
+          {
+            type: 'confirm',
+            name: 'reauth',
+            message: `Log in with ${vorpal.chalk.bold(config.credentials.email)}?`,
+            when() {
+              return config.credentials.email
+            }
+          },
+          {
+            type: 'list',
+            name: 'provider',
+            message: 'Choose authentication method',
+            when(answers) {
+              console.log({answers})
+              return !args.options['update-usage-collection'] && !answers.reauth
+            },
+            choices: [
+              { value: 'email', name: 'Email and Password' },
+              { value: 'google', name: 'Google (disabled)', disabled: true},
+              { value: 'facebook', name: 'Facebook (disabled)', disabled: true },
+              { value: 'phone', name: 'Phone Number (disabled)', disabled: true }
+            ]
+          }
+        ])
+      }).then(({collectUsage, provider, reauth}) => {
         clear()
         if (collectUsage) {
           config.usage = collectUsage
           this.log(vorpal.chalk.green('CLI usage preference saved.\n'))
           if (args.options['update-usage-collection']) return
+        }
+        if (reauth) {
+          return auth.signInWithEmailAndPassword()
         }
         this.log(vorpal.chalk.yellow('Authenticating with email and password...\n'))
         return auth.login(provider)
@@ -66,7 +82,7 @@ module.exports = function(client) {
           case 'auth/wrong-password':
             this.log(vorpal.chalk.bold('Invalid Password') + ' please try again.\n');
             return auth.emailProvider({passwordOnly: true}).then(user => {
-              this.log(vorpal.chalk.green('Successfully logged in as: ') + vorpal.chalk.bold(user.email) + '\n');
+              this.log(vorpal.chalk.green('Successfully logged in as: ') + vorpal.chalk.bold(this.config.user.email) + '\n');
             })
             break;
           default:
