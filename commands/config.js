@@ -6,7 +6,7 @@ module.exports = function(client) {
   vorpal
     .command('config [key] [value]')
     .option('--reset', 'Resets [key]')
-    .description('print config')
+    .hidden()
     .action(function(args, cb) {
       clear()
       if (args.options.reset) {

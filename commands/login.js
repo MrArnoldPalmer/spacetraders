@@ -46,7 +46,6 @@ module.exports = function(client) {
             name: 'provider',
             message: 'Choose authentication method',
             when(answers) {
-              console.log({answers})
               return !args.options['update-usage-collection'] && !answers.reauth
             },
             choices: [
@@ -85,7 +84,7 @@ module.exports = function(client) {
           case 'auth/wrong-password':
             this.log(vorpal.chalk.bold('Invalid Password') + ' please try again.\n');
             return auth.emailProvider({passwordOnly: true}).then(user => {
-              this.log(vorpal.chalk.green('Successfully logged in as: ') + vorpal.chalk.bold(this.config.user.email) + '\n');
+              this.log(vorpal.chalk.green('Successfully logged in as: ') + vorpal.chalk.bold(user ? user.email : config.user.email) + '\n');
             })
             break;
           default:

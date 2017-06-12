@@ -6,15 +6,19 @@ const figlet = require('figlet')
 const Auth = require('./lib/auth')
 const Preferences = require('preferences')
 const pkg = require('./package.json')
-const config = require('./lib/config')
 const chalk = vorpal.chalk
-const prefs = new Preferences(pkg.name, { credentials: {} })
 
-const client = {
-  vorpal,
-  config: prefs,
-  auth: new Auth(config, prefs)
-}
+let client = {}
+client.config = new Preferences(pkg.name, { credentials: {} })
+client.vorpal = vorpal
+client.auth = new Auth(client.config, client.vorpal)
+
+// Bind instance events
+client.auth.onAuthStateChanged(user => {
+  if (user) {
+    return client.vorpal.emit('auth-state-changed', user)
+  }
+})
 
 // Show banner
 clear()
@@ -28,15 +32,15 @@ console.log(chalk.bold.green('\n  Online Space Trading MMORPG'))
 console.log(chalk.cyan(`  Version ${pkg.version}\n`))
 console.log(chalk.white('  Type `help` see available commands. \n'))
 
-// fetch and instantiate all commands
+// Fetch and instantiate all commands
 require('./commands')(client)
 
-// initiate REPL
+// Initiate REPL
 vorpal
   .delimiter('spacetraders$')
   .show();
 
-// catch any unknown commands
+// Catch any unknown commands
 vorpal
   .catch('[words...]', 'Catches incorrect commands')
   .action(function (args, cb) {
