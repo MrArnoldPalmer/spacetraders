@@ -8,7 +8,7 @@ const Preferences = require('preferences')
 const pkg = require('./package.json')
 const config = require('./lib/config')
 const chalk = vorpal.chalk
-const prefs = new Preferences(pkg.name)
+const prefs = new Preferences(pkg.name, { credentials: {} })
 
 const client = {
   vorpal,

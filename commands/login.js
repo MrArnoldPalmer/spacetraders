@@ -35,7 +35,10 @@ module.exports = function(client) {
             name: 'reauth',
             message: `Log in with ${vorpal.chalk.bold(config.credentials.email)}?`,
             when() {
-              return config.credentials.email
+              if (config.credentials) {
+                return config.credentials.email
+              }
+              return false
             }
           },
           {
@@ -87,7 +90,7 @@ module.exports = function(client) {
             break;
           default:
             this.log('Sign In Error: ', error.code)
-            throw new Error(error.message)
+            throw new Error(error)
         }
       })
     })
