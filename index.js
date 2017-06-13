@@ -3,6 +3,7 @@
 const vorpal = require('vorpal')()
 const clear = require('clear')
 const figlet = require('figlet')
+const firebase = require('firebase')
 const Auth = require('./lib/auth')
 const Preferences = require('preferences')
 const pkg = require('./package.json')
@@ -11,7 +12,8 @@ const chalk = vorpal.chalk
 let client = {}
 client.config = new Preferences(pkg.name, { credentials: {} })
 client.vorpal = vorpal
-client.auth = new Auth(client.config, client.vorpal)
+client.firebase = firebase
+client.auth = new Auth(client.config, client.vorpal, client.firebase)
 
 // Bind instance events
 client.auth.onAuthStateChanged(user => {

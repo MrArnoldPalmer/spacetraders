@@ -1,7 +1,8 @@
 const clear = require('clear')
+const Game = require('../lib/game')
 
 module.exports = function(client) {
-  const {vorpal, config, auth} = client
+  const {vorpal, config, auth, firebase} = client
 
   vorpal
     .command('login')
@@ -70,6 +71,7 @@ module.exports = function(client) {
       }).then((user) => {
         if (user.emailVerified) {
           this.log(vorpal.chalk.green('Successfully logged in as: ') + vorpal.chalk.bold(user.email) + '\n');
+          client.game = new Game(config, vorpal, firebase)
           cb()
           return
         }
