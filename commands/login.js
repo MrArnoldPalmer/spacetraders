@@ -8,7 +8,7 @@ module.exports = function(client) {
     .description('log the CLI into SpaceTraders API')
     .option('-r, --reauth', 'force reauthentication even if already logged in')
     .option('-v, --resend-verification', 'resends verification email')
-    .option('-u, --update-usage-collection', 'changes usage collection preferences')
+    // .option('-u, --update-usage-collection', 'changes usage collection preferences')
     .action(function(args, cb) {
       clear()
       return new Promise((resolve, reject) => {
@@ -61,7 +61,6 @@ module.exports = function(client) {
         if (collectUsage) {
           config.usage = collectUsage
           this.log(vorpal.chalk.green('CLI usage preference saved.\n'))
-          if (args.options['update-usage-collection']) return
         }
         if (reauth) {
           return auth.signInWithEmailAndPassword()
