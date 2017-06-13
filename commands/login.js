@@ -51,7 +51,7 @@ module.exports = function(client) {
             },
             choices: [
               { value: 'email', name: 'Email and Password' },
-              { value: 'google', name: 'Google (disabled)', disabled: true},
+              { value: 'google', name: 'Google'},
               { value: 'facebook', name: 'Facebook (disabled)', disabled: true },
               { value: 'phone', name: 'Phone Number (disabled)', disabled: true }
             ]
@@ -66,7 +66,7 @@ module.exports = function(client) {
         if (reauth) {
           return auth.signInWithEmailAndPassword()
         }
-        this.log(vorpal.chalk.yellow('Authenticating with email and password...\n'))
+        config.provider = provider
         return auth.login(provider)
       }).then((user) => {
         if (user.emailVerified) {
