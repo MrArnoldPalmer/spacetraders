@@ -68,8 +68,8 @@ module.exports = function(client) {
         }
         this.log(vorpal.chalk.yellow('Authenticating with email and password...\n'))
         return auth.login(provider)
-      }).then(user => {
-        if (user) {
+      }).then((user) => {
+        if (user.emailVerified) {
           this.log(vorpal.chalk.green('Successfully logged in as: ') + vorpal.chalk.bold(user.email) + '\n');
           cb()
           return
