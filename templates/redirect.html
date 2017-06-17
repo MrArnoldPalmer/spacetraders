@@ -5,10 +5,10 @@
     <title>SpaceTraders MMO</title>
   </head>
   <body>
-    <button id="login">Log in with Google</button>
+    Logging in with Google Auth
 
     <script src="https://www.gstatic.com/firebasejs/4.1.2/firebase.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/4.1.2/firebase-auth.js"></script>
+    <!-- <script src="https://www.gstatic.com/firebasejs/4.1.2/firebase-auth.js"></script> -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.16.2/axios.js"></script>
     <script>
       // Initialize Firebase
@@ -22,17 +22,17 @@
       };
       firebase.initializeApp(config);
 
-      document.getElementById('login').addEventListener('click', function() {
-        firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider()).then(function(result) {
-          axios.post('http://localhost:9005/google/auth/callback', { data: { result: result }})
-            .then(function(response) { console.log(response.data) })
-            .catch(function(err) { console.error(err)})
-        }).catch(function(error) {
-          axios.post('http://localhost:9005/google/auth/error', { data: { result: result }})
-            .then(function(response) { console.log(response.data) })
-            .catch(function(err) { console.error(err)})
-        });
+      firebase.auth().getRedirectResult().then(function(result) {
+        if (result.credential) {
+          return axios.post('/auth/google/callback', { data: result.credential }).then(function() {
+            console.log('success')
+          })
+        }
+        firebase.auth().signInWithRedirect(new firebase.auth.GoogleAuthProvider());
+      }).catch(function(error) {
+        console.error(error)
       });
+
     </script>
   </body>
 
