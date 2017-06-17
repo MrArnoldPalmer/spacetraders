@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>SpaceTraders MMO</title>
+  </head>
+  <body>
+    <button id="login">Log in with Google</button>
+
+    <script src="https://www.gstatic.com/firebasejs/4.1.2/firebase.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/4.1.2/firebase-auth.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.16.2/axios.js"></script>
+    <script>
+      // Initialize Firebase
+      var config = {
+        apiKey: "AIzaSyDpM75m_1kA6R9eDMU09pNbqqUpHeNfkbE",
+        authDomain: "spice-2cfa2.firebaseapp.com",
+        databaseURL: "https://spice-2cfa2.firebaseio.com",
+        projectId: "spice-2cfa2",
+        storageBucket: "spice-2cfa2.appspot.com",
+        messagingSenderId: "888244626444"
+      };
+      firebase.initializeApp(config);
+
+      document.getElementById('login').addEventListener('click', function() {
+        firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider()).then(function(result) {
+          axios.post('http://localhost:9005/google/auth/callback', { data: { result: result }})
+            .then(function(response) { console.log(response.data) })
+            .catch(function(err) { console.error(err)})
+        }).catch(function(error) {
+          axios.post('http://localhost:9005/google/auth/error', { data: { result: result }})
+            .then(function(response) { console.log(response.data) })
+            .catch(function(err) { console.error(err)})
+        });
+      });
+    </script>
+  </body>
+
+</html>
