@@ -7,8 +7,8 @@ module.exports = function(client) {
   vorpal
     .command('login')
     .description('log the CLI into SpaceTraders API')
-    .option('-r, --reauth', 'force reauthentication even if already logged in')
-    .option('-v, --resend-verification', 'resends verification email')
+    // .option('-r, --reauth', 'force reauthentication even if already logged in')
+    // .option('-v, --resend-verification', 'resends verification email')
     // .option('-u, --update-usage-collection', 'changes usage collection preferences')
     .action(function(args, cb) {
       clear()
@@ -35,9 +35,14 @@ module.exports = function(client) {
             type: 'confirm',
             name: 'reauth',
             message: `Log in with ${vorpal.chalk.bold(config.credentials.email)}?`,
-            when() {
+            when(answers) {
               if (config.credentials) {
                 return config.credentials.email
+              } else if (config.user) {
+                if (config.user.provider === 'google') {
+                  answers.google = true
+                  return config.user.stsTokenManager.accessToken
+                }
               }
               return false
             }
@@ -57,19 +62,25 @@ module.exports = function(client) {
             ]
           }
         ])
-      }).then(({collectUsage, provider, reauth}) => {
+      }).then(({collectUsage, provider, reauth, google}) => {
         clear()
         if (collectUsage) {
           config.usage = collectUsage
           this.log(vorpal.chalk.green('CLI usage preference saved.\n'))
         }
         if (reauth) {
-          return auth.signInWithEmailAndPassword()
+          if (!google) {
+            return auth.signInWithEmailAndPassword()
+          } else if (google) {
+            return auth.signInWithGoogle(config.user.stsTokenManager.accessToken)
+          }
         }
+
         config.provider = provider
         return auth.login(provider)
       }).then((user) => {
         if (user.emailVerified) {
+          config.user = user
           this.log(vorpal.chalk.green('Successfully logged in as: ') + vorpal.chalk.bold(user.email) + '\n');
           client.game = new Game(config, vorpal, firebase)
           cb()
